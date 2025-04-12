@@ -1,0 +1,98 @@
+services:
+  haproxy:
+    image: docker.io/library/haproxy:3.0.9-alpine3.21
+    ports:
+      - 9000:9000
+      - 9001:9001
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
+    volumes:
+      - ./config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+  minio1:
+    image: quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z
+    environment:
+      MINIO_CONFIG_ENV_FILE: /etc/config.env
+    volumes:
+      - ./config/minio:/etc/config.env
+      - ./data/minio1:/data
+    command: server --console-address :9001
+  minio2:
+    image: quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z
+    environment:
+      MINIO_CONFIG_ENV_FILE: /etc/config.env
+    volumes:
+      - ./config/minio:/etc/config.env
+      - ./data/minio2:/data
+    command: server --console-address :9001
+  minio3:
+    image: quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z
+    environment:
+      MINIO_CONFIG_ENV_FILE: /etc/config.env
+    volumes:
+      - ./config/minio:/etc/config.env
+      - ./data/minio3:/data
+    command: server --console-address :9001
+  minio4:
+    image: quay.io/minio/minio:RELEASE.2025-03-12T18-04-18Z
+    environment:
+      MINIO_CONFIG_ENV_FILE: /etc/config.env
+    volumes:
+      - ./config/minio:/etc/config.env
+      - ./data/minio4:/data
+    command: server --console-address :9001
+
+  etcd1:
+    image: quay.io/coreos/etcd:v3.5.21
+    container_name: etcd1
+    environment:
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd1:2379
+      - ETCD_INITIAL_CLUSTER=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=f6137aba-fe49-4164-95db-71ce41e53296
+      - ETCD_NAME=etcd1
+      - ETCD_DATA_DIR=/data
+      - ETCD_AUTH_ENABLE=true
+      - ETCD_ROOT_PASSWORD=Admin!@#$1234
+    volumes:
+      - ./data/etcd1:/data
+
+  etcd2:
+    image: quay.io/coreos/etcd:v3.5.21
+    container_name: etcd2
+    environment:
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd2:2379
+      - ETCD_INITIAL_CLUSTER=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=f6137aba-fe49-4164-95db-71ce41e53296
+      - ETCD_NAME=etcd2
+      - ETCD_DATA_DIR=/data
+      - ETCD_AUTH_ENABLE=true
+      - ETCD_ROOT_PASSWORD=Admin!@#$1234
+    volumes:
+      - ./data/etcd2:/data
+
+  etcd3:
+    image: quay.io/coreos/etcd:v3.5.21
+    container_name: etcd3
+    environment:
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd3:2379
+      - ETCD_INITIAL_CLUSTER=etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=f6137aba-fe49-4164-95db-71ce41e53296
+      - ETCD_NAME=etcd3
+      - ETCD_DATA_DIR=/data
+      - ETCD_AUTH_ENABLE=true
+      - ETCD_ROOT_PASSWORD=Admin!@#$1234
+    volumes:
+      - ./data/etcd3:/data

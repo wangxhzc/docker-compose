@@ -1,0 +1,5 @@
+连接namenode
+
+hdfs dfs -mkdir -p /opt/hive/data/warehouse
+hdfs dfs -chown -R hive:hadoop /opt/hive/data/warehouse
+hdfs dfs -chmod -R 775 /opt/hive/data/warehouse

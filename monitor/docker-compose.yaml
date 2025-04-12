@@ -1,0 +1,63 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./config/prometheus:/etc/prometheus
+      - ./data/prometheus:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+      - "--storage.tsdb.retention.size=4GB"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9090"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 3m
+    deploy:
+      restart_policy:
+        condition: any
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - "9093:9093"
+    user: root
+    volumes:
+      - ./config/alertmanager:/etc/alertmanager
+      - ./data/alertmanager:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9093"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: any
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      TZ: Asia/Shanghai
+    volumes:
+      - "./config/grafana:/etc/grafana"
+      - "./data/grafana:/var/lib/grafana"
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/3000"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5m
+    deploy:
+      restart_policy:
+        condition: any
